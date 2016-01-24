@@ -1,3 +1,4 @@
-## Coordinator Behavior example
+## Fork from https://github.com/saulmm 
+Coordinator Behavior example
 
-In this example I've tried to replicate the profile animation of `Hangouts 4.0`to show how a `CoordinatorLayout.Behavior` could be used
+I've tried to improve saul's replication of  Hangout 4.0 contact animation by adding a curve to the avatar.
