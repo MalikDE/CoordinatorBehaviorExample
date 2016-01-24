@@ -2,8 +2,8 @@
 <resources>
 
     <!-- colors -->
-    <color name="primary">#785447</color>
-    <color name="primaryDark">#5B3F36</color>
+    <color name="primary">#7b8efa</color>
+    <color name="primaryDark">#405ada</color>
 
     <!-- dimensions -->
     <dimen name="image_width">120dp</dimen>
