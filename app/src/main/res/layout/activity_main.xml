@@ -20,33 +20,25 @@
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
-            <RelativeLayout
+            <ImageView
+                android:id="@+id/main.imageview.placeholder"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="500dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/small"
+                android:tint="#11000000"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.9"
+                />
 
-                <ImageView
-                    android:id="@+id/main.imageview.placeholder"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/small"
-                    android:tint="#11000000"
-                    app:layout_collapseMode="parallax"
-                    app:layout_collapseParallaxMultiplier="0.9"
-                    />
-
-                <View
-                    android:id="@+id/main.space"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_gravity="bottom|center_horizontal"
-                    app:layout_collapseMode="parallax"
-                    android:layout_below="@id/main.imageview.placeholder"
-                    app:layout_collapseParallaxMultiplier="0.1"/>
-
-            </RelativeLayout>
-
-
+            <View
+                android:id="@+id/main.space"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:background="@color/primary"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.2"/>
 
             <FrameLayout
                 android:id="@+id/main.framelayout.title"
@@ -92,7 +84,8 @@
 
 
     </android.support.design.widget.AppBarLayout>
-        <android.support.v4.widget.NestedScrollView
+
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none"
@@ -122,8 +115,8 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/primary"
-        android:gravity="bottom"
-        app:layout_anchor="@id/main.space"
+        app:layout_anchorGravity="bottom"
+        app:layout_anchor="@id/main.collapsing"
         app:theme="@style/ThemeOverlay.AppCompat.Dark"
         app:title="">
 

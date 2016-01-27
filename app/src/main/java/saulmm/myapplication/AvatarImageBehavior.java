@@ -4,49 +4,44 @@ import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 
 @SuppressWarnings("unused")
 public class AvatarImageBehavior extends CoordinatorLayout.Behavior<ImageView> {
 
-//    private final static float MIN_AVATAR_PERCENTAGE_SIZE = 0.3f;
-//    private final static int EXTRA_FINAL_AVATAR_PADDING = 80;
-
     private final static String TAG = "behavior";
-    private final Context mContext;
-    private float mAvatarMaxSize;
+    private final Context _context;
 
-    private float mFinalLeftAvatarPadding;
-    private float mStartPosition;
-    private int mStartXPosition;
-    private float mStartToolbarPosition;
+    private float _dependencyMaxScroll;
+    private float _minScrollDistance;
+
+
+    private int _statusBarHeight;
+
+    private int _startMarginLeft;
+    private int _startMarginTop;
+    private int _startHeight;
+
+    private int _finalMarginLeft;
+    private int _finalMarginTop;
+    private int _finalHeight;
+
+    private int _toolbarHeight;
+
+    private CoordinatorLayout.LayoutParams _startParams;
+
 
     public AvatarImageBehavior(Context context, AttributeSet attrs) {
-        mContext = context;
-        init();
-
-        mFinalLeftAvatarPadding = context.getResources().getDimension(
-                R.dimen.spacing_normal);
+        _context = context;
     }
-
-    private void init() {
-        bindDimensions();
-    }
-
-    private void bindDimensions() {
-        mAvatarMaxSize = mContext.getResources().getDimension(R.dimen.image_width);
-    }
-
-    private int mStartYPosition;
-
-    private int mFinalYPosition;
-    private int finalHeight;
-    private int mStartHeight;
-    private int mFinalXPosition;
 
     @Override
     public boolean layoutDependsOn(CoordinatorLayout parent, ImageView child, View dependency) {
+        if (dependency instanceof Toolbar) {
+            _toolbarHeight = dependency.getLayoutParams().height;
+        }
         return dependency instanceof Toolbar;
     }
 
@@ -54,57 +49,83 @@ public class AvatarImageBehavior extends CoordinatorLayout.Behavior<ImageView> {
     public boolean onDependentViewChanged(CoordinatorLayout parent, ImageView child, View dependency) {
         maybeInitProperties(child, dependency);
 
-        final int maxScrollDistance = (int) (mStartToolbarPosition - getStatusBarHeight());
-        float expandedPercentageFactor = dependency.getY() / maxScrollDistance;
+        final float currentScrollDistance = (float) (dependency.getBottom() - _minScrollDistance);
 
-        float distanceYToSubtract = ((mStartYPosition - mFinalYPosition) * (1 - expandedPercentageFactor * expandedPercentageFactor)) + (child.getHeight() / 2);
+        float expandedPercentageFactor = currentScrollDistance / _dependencyMaxScroll;
 
-        float distanceXToSubtract = ((mStartXPosition - mFinalXPosition) * (1 - expandedPercentageFactor * (2 - expandedPercentageFactor))) + (child.getWidth() / 2);
-
-        float heightToSubtract = ((mStartHeight - finalHeight) * (1f - expandedPercentageFactor));
-
-        child.setY(mStartYPosition - distanceYToSubtract);
-        child.setX(mStartXPosition - distanceXToSubtract);
-
-        int proportionalAvatarSize = (int) (mAvatarMaxSize * (expandedPercentageFactor));
+        float heightToSubtract = ((_startHeight - _finalHeight) * (1f - expandedPercentageFactor));
 
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
-        lp.width = (int) (mStartHeight - heightToSubtract);
-        lp.height = (int) (mStartHeight - heightToSubtract);
+
+        lp.width = (int) (_startHeight - heightToSubtract);
+        lp.height = (int) (_startHeight - heightToSubtract);
+
+        float distanceYToSubtract = ((_startMarginTop - _finalMarginTop) * (1f - expandedPercentageFactor * expandedPercentageFactor)) + (lp.height / 2);
+        float distanceXToSubtract = ((_startMarginLeft - _finalMarginLeft) * (1f - expandedPercentageFactor * (2 - expandedPercentageFactor))) + (lp.width / 2);
+
+        lp.topMargin = _startMarginTop - (int) distanceYToSubtract;
+        lp.leftMargin = _startMarginLeft - (int) distanceXToSubtract;
+
         child.setLayoutParams(lp);
         return true;
     }
 
     private void maybeInitProperties(View child, View dependency) {
-        if (mStartYPosition == 0)
-            mStartYPosition = (int) (dependency.getY());
+        if (_startMarginTop == 0) {
+            _startMarginTop = (int) child.getY();
+        }
 
-        if (mFinalYPosition == 0)
-            mFinalYPosition = (dependency.getHeight() / 2);
+        if (_startMarginLeft == 0) {
+            _startMarginLeft = (int) (child.getX() + child.getWidth() / 2);
+        }
 
-        if (mStartHeight == 0)
-            mStartHeight = child.getHeight();
+        if (_finalMarginTop == 0) {
+            _finalMarginTop = dependency.getHeight() / 2;
+        }
+        if (_finalMarginLeft == 0) {
+            _finalMarginLeft = _context.getResources().getDimensionPixelOffset(R.dimen.abc_action_bar_content_inset_material);
+        }
 
-        if (finalHeight == 0)
-            finalHeight = mContext.getResources().getDimensionPixelOffset(R.dimen.image_final_width);
 
-        if (mStartXPosition == 0)
-            mStartXPosition = (int) (child.getX() + (child.getWidth() / 2));
+        if (_finalHeight == 0) {
+            _finalHeight = _context.getResources().getDimensionPixelOffset(R.dimen.image_final_width);
+        }
 
-        if (mFinalXPosition == 0)
-            mFinalXPosition = mContext.getResources().getDimensionPixelOffset(R.dimen.abc_action_bar_content_inset_material) + (finalHeight / 2);
+        if (_startHeight == 0) {
+            _startHeight = child.getHeight();
+        }
 
-        if (mStartToolbarPosition == 0)
-            mStartToolbarPosition = dependency.getY() + (dependency.getHeight() / 2);
+        if (_startParams == null) {
+            //reset layoutParams and set current margin
+            CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(child.getWidth(), child.getHeight());
+            params.topMargin = _startMarginTop;
+            params.leftMargin = _startMarginLeft;
+            params.setBehavior(this);
+            child.setLayoutParams(params);
+            _startParams = params;
+        }
+
+        if (_dependencyMaxScroll == 0) {
+            _minScrollDistance = (_toolbarHeight / 2) + getStatusBarHeight();
+            _dependencyMaxScroll = dependency.getBottom() - _minScrollDistance;
+        }
     }
 
     public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = mContext.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (_statusBarHeight == 0) {
+            int result = 0;
+            int resourceId = _context.getResources().getIdentifier("status_bar_height", "dimen", "android");
 
-        if (resourceId > 0) {
-            result = mContext.getResources().getDimensionPixelSize(resourceId);
+            if (resourceId > 0) {
+                result = _context.getResources().getDimensionPixelSize(resourceId);
+            }
+            _statusBarHeight = result;
         }
-        return result;
+
+        return _statusBarHeight;
+    }
+
+    private int convertDpToPx(int px) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, px, _context.getResources().getDisplayMetrics());
     }
 }
