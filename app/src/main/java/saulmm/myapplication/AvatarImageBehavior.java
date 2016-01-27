@@ -72,7 +72,7 @@ public class AvatarImageBehavior extends CoordinatorLayout.Behavior<ImageView> {
 
     private void maybeInitProperties(View child, View dependency) {
         if (_startMarginTop == 0) {
-            _startMarginTop = (int) child.getY();
+            _startMarginTop = (int) child.getY() + child.getHeight() / 2;
         }
 
         if (_startMarginLeft == 0) {
